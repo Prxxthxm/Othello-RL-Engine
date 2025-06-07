@@ -1,1 +1,1 @@
-# Othello-RL-Engine
+# Othello Engine using Reinforcement Learning
