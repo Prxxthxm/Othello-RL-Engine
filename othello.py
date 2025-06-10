@@ -34,23 +34,45 @@ class Othello:
             for col in range(8):
                 if self.is_valid_move(row, col): self.legal_moves.append((row, col))
         return self.legal_moves
+    
+    def flip_pieces(self, row, col):
+        directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+        for dy, dx in directions:
+            nrow, ncol = row + dy, col + dx
+            flip = []
+            
+            while 0 <= nrow < 8 and 0 <= ncol < 8:
+                if self.board[nrow][ncol] == -self.current_turn: flip.append((nrow, ncol))
+                elif self.board[nrow][ncol] == self.current_turn:
+                    for r, c in flip: self.board[r][c] = self.current_turn
+                    break
+                else: break
+                nrow += dy
+                ncol += dx
 
     def take_turn(self, row, col) -> bool:
-        if self.is_valid_move(row, col):
-            self.board[row][col] = self.current_turn
-            self.current_turn *= -1  # TODO: implement correct logic
-            return True
+        if len(self.get_legal_moves()) == 0: return True
+        if not self.is_valid_move(row, col): return False
+
+        self.board[row][col] = self.current_turn
+        self.flip_pieces(row, col)
+        self.current_turn *= -1
+        return True
+    
+    def is_game_over(self) -> bool:
+        if not any(self.board == 0): return True
+        if len(self.get_legal_moves()) == 0:
+            self.current_turn *= -1
+            if len(self.get_legal_moves()) == 0: 
+                self.current_turn *= -1
+                return True
+            self.current_turn *= -1
 
         return False
 
-    def is_game_over(self) -> bool:
-        return np.any(self.board == 0)  # TODO: implement correct logic
-
     def get_winner_id(self) -> int:
-        if not self.is_game_over():
-            return 0
-
-        return 1 if np.sum(self.board) > 0 else -1
+        if not self.is_game_over(): return 0
+        return 1 if np.sum(self.board) > 0 else 0 if np.sum(self.board) == 0 else -1
 
     def display_board(self):
         root = tk.Tk()
