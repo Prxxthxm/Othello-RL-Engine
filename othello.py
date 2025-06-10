@@ -1,8 +1,10 @@
 import tkinter as tk
+import numpy as np
+
 
 class Othello:
     def __init__(self):
-        self.board = [[0 for _ in range(8)] for _ in range(8)] # Let 1 be 'B', -1 be 'W' and 0 be empty
+        self.board = np.array([[0 for _ in range(8)] for _ in range(8)], dtype=int)  # Let 1 be 'B', -1 be 'W' and 0 be empty
         self.board[3][3] = self.board[4][4] = -1
         self.board[3][4] = self.board[4][3] = 1
         self.current_turn = 1
@@ -31,7 +33,24 @@ class Othello:
         for row in range(8):
             for col in range(8):
                 if self.is_valid_move(row, col): self.legal_moves.append((row, col))
-        return self.legal_moves  
+        return self.legal_moves
+
+    def take_turn(self, row, col) -> bool:
+        if self.is_valid_move(row, col):
+            self.board[row][col] = self.current_turn
+            self.current_turn *= -1  # TODO: implement correct logic
+            return True
+
+        return False
+
+    def is_game_over(self) -> bool:
+        return np.any(self.board == 0)  # TODO: implement correct logic
+
+    def get_winner_id(self) -> int:
+        if not self.is_game_over():
+            return 0
+
+        return 1 if np.sum(self.board) > 0 else -1
 
     def display_board(self):
         root = tk.Tk()
@@ -52,5 +71,7 @@ class Othello:
         
         root.mainloop()
 
-new_game = Othello()
-# new_game.display_board()
+
+if __name__ == "__main__":
+    new_game = Othello()
+    # new_game.display_board()
