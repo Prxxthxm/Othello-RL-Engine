@@ -1,6 +1,6 @@
 import tkinter as tk
 import numpy as np
-
+import torch
 
 class Othello:
     def __init__(self):
@@ -73,6 +73,17 @@ class Othello:
     def get_winner_id(self) -> int:
         if not self.is_game_over(): return 0
         return 1 if np.sum(self.board) > 0 else 0 if np.sum(self.board) == 0 else -1
+    
+    def get_input(self) -> torch.Tensor:
+        game_state = torch.tensor(self.board, dtype=torch.float32)
+
+        legal_moves = torch.zeros((8, 8), dtype=torch.float32)
+        for row, col in self.get_legal_moves(): legal_moves[row][col] = 1.0
+
+        current_player = torch.full((8, 8), self.current_turn, dtype=torch.float32)
+
+        input_tensor = torch.stack([game_state, legal_moves, current_player])
+        return input_tensor
 
     def display_board(self):
         root = tk.Tk()
@@ -96,4 +107,3 @@ class Othello:
 
 if __name__ == "__main__":
     new_game = Othello()
-    # new_game.display_board()
