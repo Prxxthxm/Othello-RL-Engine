@@ -9,8 +9,9 @@ class CNN_Player(nn.Module):
             nn.ReLU(),
         )
 
+        self.flatten = nn.Flatten()
+
         self.q_score = nn.Sequential(
-            nn.Flatten(start_dim=0),
             nn.Linear(out_channels*8*8,128),
             nn.ReLU(),
             nn.Linear(128,64)
@@ -20,5 +21,6 @@ class CNN_Player(nn.Module):
     def forward(self,tensor_t): # itensor_t is the input tensor at time step t
       # take in itensor_t
       x = self.features(tensor_t) # extracting features from the tensor
+      x = self.flatten(x)
       x = self.q_score(x) # apply the FC layer to get Q(s_t,a_t) value for given state in itensor_t and all possible legal moves a_t
       return x  

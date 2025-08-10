@@ -60,7 +60,6 @@ class Othello:
         return True
     
     def is_game_over(self) -> bool:
-        if not any(self.board == 0): return True
         if len(self.get_legal_moves()) == 0:
             self.current_turn *= -1
             if len(self.get_legal_moves()) == 0: 

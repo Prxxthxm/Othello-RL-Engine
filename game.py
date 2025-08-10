@@ -16,7 +16,7 @@ class Environment:
         """
         return self.game.get_input()
 
-    def step(self, action: tuple[int, int]) -> tuple[tuple[np.ndarray, int], int, int]:
+    def step(self, action: int) -> tuple[tuple[np.ndarray, int], int, int]:
         """
         Takes a step in the environment.
 
@@ -35,7 +35,7 @@ class Environment:
             True if the game is over after this action, otherwise False.
         """
 
-        r, c = action
+        r, c = divmod(action, 8)
         player = self.game.current_turn
 
         success = self.game.take_turn(r, c)
