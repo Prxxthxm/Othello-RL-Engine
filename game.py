@@ -14,7 +14,7 @@ class Environment:
             np.ndarray: the current board where 1 is a black piece, -1 is white, and 0 is an empty square.
             int: the ID of the player whose turn it is (+1/-1)
         """
-        return self.game.board, self.game.current_turn
+        return self.game.get_input()
 
     def step(self, action: tuple[int, int]) -> tuple[tuple[np.ndarray, int], int, int]:
         """
@@ -54,6 +54,5 @@ class Environment:
 
         return 1 if winner == player else -1
 
-    def reset(self):
+    def reset(self) -> None:
         self.game = Othello()
-        return self.get_state()
