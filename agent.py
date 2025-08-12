@@ -66,20 +66,61 @@ class Agent:
         loss.backward()
         self.optimizer.step()
 
+    def evaluate(self,episodes):
+        test_env = Environment()
+        rl_score = 0
+        for ep in range(episodes):
+            test_env.reset()
+            test_game = test_env.game
+            # print(ep)
+            rl_player = 1 if ep%2==0 else -1
+            while not test_game.is_game_over():
+                    state = test_env.get_state()
+                    legal_moves = test_game.get_legal_moves()
+                    
+                    if len(legal_moves) == 0:
+                        test_game.current_turn *= -1
+                    legal_moves = test_game.get_legal_moves()
+                    # print(test_game.current_turn)
+                    if test_game.current_turn == rl_player:
+                        action = self.action(state,legal_moves)
+                        # print("action by RL")
+                        # print(action)
+                    else:
+                        # print(legal_moves)
+                        move_index = (random.choice(legal_moves))
+                        action =  8 * move_index[0] + move_index[1]
+                        # print("action by random")
+                    next_state, reward, done = test_env.step(action=action)
+                    # print("action taken")
+                    if done:
+                        next_state = None
+            winner = test_game.get_winner_id()
+            if winner == rl_player:
+                print("RL agent wins!")
+                rl_score += 1
+            elif winner == 0:
+                print("Draw")
+                rl_score += 0.5
+            else:
+                print("Random agent wins")
+        print("RL Win rate: ",rl_score/episodes*100,"%" )
     def train(self):
         env = Environment()
-        for ep in range(1,50):
+        for ep in range(1,10000):
             env.reset()
-            # if ep%10 == 0:
-            #     print(ep)
+            if ep%10 == 0:
+                print(ep)
             if ep%50 == 0:
                 self.epsilon = max(self.epsilon*0.99,0.05)
+                self.evaluate(10)
             game = env.game
             while not game.is_game_over():
                 state = env.get_state()
                 legal_moves = game.get_legal_moves()
                 if len(legal_moves) == 0:
                     game.current_turn *= -1
+                legal_moves = game.get_legal_moves()
                 action = self.action(state,legal_moves)
 
                 next_state, reward, done = env.step(action=action)
