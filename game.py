@@ -39,9 +39,9 @@ class Environment:
         r, c = divmod(action, 8)
         player = self.game.current_turn
 
-        num_pieces_of_self_before = torch.sum(self.game.board == player)
+        num_pieces_of_self_before = np.sum(self.game.board == player)
         success = self.game.take_turn(r, c)
-        num_pieces_of_self_after = torch.sum(self.game.board == player)
+        num_pieces_of_self_after = np.sum(self.game.board == player)
 
         num_pieces_overturned = num_pieces_of_self_after - num_pieces_of_self_before - 1
 
