@@ -1,6 +1,6 @@
 from othello import Othello
 from game import Environment
-from CNN_model import CNN_Player
+from model import OthelloPlayer
 import numpy as np
 import random
 import torch
@@ -17,8 +17,8 @@ class Agent:
         self.batch_size = batch_size
         self.memory = deque(maxlen=max_memory)
 
-        self.model = CNN_Player(out_channels=32, conv_size=3)
-        self.target_model = CNN_Player(out_channels=32, conv_size=3)
+        self.model = OthelloPlayer()
+        self.target_model = OthelloPlayer()
         self.target_model.load_state_dict(self.model.state_dict())
         self.target_model.eval()
 
@@ -118,8 +118,10 @@ class Agent:
         loss = 0.0
         for ep in range(1, 20_001):
             env.reset()
-            num_random_moves = random.randint(0, 20)
-            env.play_random_moves(num_random_moves)
+
+            if ep > 2000:
+                num_random_moves = random.randint(0, 20)
+                env.play_random_moves(num_random_moves)
 
             if ep % 10 == 0:
                 print(f"Episode: {ep}, Loss: {loss}")
@@ -149,5 +151,5 @@ class Agent:
                 self.target_model.load_state_dict(self.model.state_dict())
 
 
-agent = Agent(batch_size=128)
+agent = Agent(batch_size=128, lr=0.0001)
 agent.train()
