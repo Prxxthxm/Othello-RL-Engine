@@ -129,7 +129,8 @@ class Agent:
         loss = 0.0
         for ep in range(1, 20_001):
             env.reset()
-
+            num_random_moves = random.randint(0, 20)
+            env.play_random_moves(num_random_moves)
 
             if ep % 10 == 0:
                 print(f"Episode: {ep}, Loss: {loss}")

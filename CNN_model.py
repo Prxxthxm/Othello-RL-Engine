@@ -35,5 +35,5 @@ class CNN_Player(nn.Module):
         x = self.features(tensor_t)  # extracting features from the tensor
         x = self.flatten(x)
         x = self.q_score(
-            x)  # apply the FC layer to get Q(s_t,a_t) value for given state in itensor_t and all possible legal moves a_t
+x)  # apply the FC layer to get Q(s_t,a_t) value for given state in itensor_t and all possible legal moves a_t
         return x
