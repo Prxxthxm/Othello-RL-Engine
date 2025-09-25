@@ -10,7 +10,7 @@ from collections import deque
 
 
 class Agent:
-    def __init__(self, gamma=0.999, epsilon=1.0, lr=0.001, max_memory=1000000, batch_size=32):
+    def __init__(self, gamma=0.999, epsilon=1.0, lr=0.001, max_memory=10_000, batch_size=32):
         self.gamma = gamma
         self.epsilon = epsilon
         self.lr = lr
@@ -23,10 +23,10 @@ class Agent:
         self.target_model.eval()
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
-        #self.scheduler = StepLR(optimizer=self.optimizer,step_size=5000,gamma=0.05)
+        # self.scheduler = StepLR(optimizer=self.optimizer,step_size=5000,gamma=0.05)
         self.loss_func = nn.MSELoss()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        
+
         self.model.to(self.device)
         self.target_model.to(self.device)
 
@@ -40,7 +40,7 @@ class Agent:
 
         tensor_t = torch.tensor(state, dtype=torch.float32, device=self.device).unsqueeze(0)
         q_values = self.model(tensor_t).squeeze(0).cpu().detach().numpy()
-        
+
         mask = np.full(q_values.shape, -np.inf)
         for r, c in legal_moves:
             idx = 8 * r + c
@@ -79,7 +79,7 @@ class Agent:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-        #self.scheduler.step()
+        # self.scheduler.step()
         return loss.item()
 
     def evaluate(self, episodes):
@@ -129,6 +129,8 @@ class Agent:
         loss = 0.0
         for ep in range(1, 20_001):
             env.reset()
+
+
             if ep % 10 == 0:
                 print(f"Episode: {ep}, Loss: {loss}")
             if ep % 50 == 0:

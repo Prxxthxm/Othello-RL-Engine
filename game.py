@@ -1,5 +1,6 @@
 from othello import Othello
 import numpy as np
+import random
 
 
 class Environment:
@@ -56,3 +57,13 @@ class Environment:
 
     def reset(self) -> None:
         self.game = Othello()
+
+    def play_random_moves(self, num_moves: int) -> None:
+        for _ in range(num_moves):
+            legal_moves = self.game.get_legal_moves()
+
+            if len(legal_moves) > 0:
+                move = random.choice(legal_moves)
+                self.game.take_turn(move[0], move[1])
+            else:
+                break
