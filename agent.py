@@ -5,11 +5,12 @@ import numpy as np
 import random
 import torch
 import torch.nn as nn
+from torch.optim.lr_scheduler import StepLR
 from collections import deque
 
 
 class Agent:
-    def __init__(self, gamma=0.999, epsilon=1.0, lr=0.01, max_memory=10000, batch_size=2):
+    def __init__(self, gamma=0.999, epsilon=1.0, lr=0.001, max_memory=1000000, batch_size=32):
         self.gamma = gamma
         self.epsilon = epsilon
         self.lr = lr
@@ -22,6 +23,7 @@ class Agent:
         self.target_model.eval()
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
+        #self.scheduler = StepLR(optimizer=self.optimizer,step_size=5000,gamma=0.05)
         self.loss_func = nn.MSELoss()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
@@ -77,6 +79,7 @@ class Agent:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        #self.scheduler.step()
         return loss.item()
 
     def evaluate(self, episodes):
@@ -121,14 +124,15 @@ class Agent:
         print("RL Win rate: ", rl_score / episodes * 100, "%")
 
     def train(self):
+        losses = []
         env = Environment()
         loss = 0.0
-        for ep in range(1, 10_001):
+        for ep in range(1, 20_001):
             env.reset()
             if ep % 10 == 0:
                 print(f"Episode: {ep}, Loss: {loss}")
             if ep % 50 == 0:
-                self.epsilon = max(self.epsilon * 0.99, 0.05)
+                self.epsilon = max(self.epsilon * 0.99, 0.08)
                 self.evaluate(50)
 
             game = env.game
@@ -153,5 +157,5 @@ class Agent:
                 self.target_model.load_state_dict(self.model.state_dict())
 
 
-agent = Agent(batch_size=32)
+agent = Agent(batch_size=128)
 agent.train()
