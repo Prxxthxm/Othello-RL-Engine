@@ -30,9 +30,6 @@ class Agent:
         self.model.to(self.device)
         self.target_model.to(self.device)
 
-    def remember(self, state, action, reward, next_state, over):
-        self.memory.append((state, action, reward, next_state, over))
-
     def action(self, state, legal_moves):
         if random.random() < self.epsilon and len(legal_moves) > 0:
             move_index = (random.choice(legal_moves))
@@ -96,32 +93,24 @@ class Agent:
 
                 if len(legal_moves) == 0:
                     test_game.current_turn *= -1
-                legal_moves = test_game.get_legal_moves()
-                # print(test_game.current_turn)
+                    legal_moves = test_game.get_legal_moves()
+
                 if test_game.current_turn == rl_player:
                     action = self.action(state, legal_moves)
-                    # print("action by RL")
-                    # print(action)
                 else:
-                    # print(legal_moves)
                     move_index = (random.choice(legal_moves))
                     action = 8 * move_index[0] + move_index[1]
-                    # print("action by random")
 
                 test_env.step(action=action)
-                # print("action taken")
 
             winner = test_game.get_winner_id()
             if winner == rl_player:
-                # print("RL agent wins!")
                 rl_score += 1
             elif winner == 0:
-                # print("Draw")
                 rl_score += 0.5
             else:
-                # print("Random agent wins")
                 pass
-        print("RL Win rate: ", rl_score / episodes * 100, "%")
+        print("RL Win rate: ", (rl_score / episodes) * 100, "%")
 
     def train(self):
         losses = []
@@ -152,7 +141,7 @@ class Agent:
                 if done:
                     next_state = None
 
-                self.remember(state, action, reward, next_state, done)
+                self.memory.append((state, action, reward, next_state, done))
 
             loss = self.replay()
 

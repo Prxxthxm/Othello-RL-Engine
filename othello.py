@@ -59,8 +59,11 @@ class Othello:
                 ncol += dx
 
     def take_turn(self, row, col) -> bool:
-        if len(self.get_legal_moves()) == 0: return True
-        if not self.is_valid_move(row, col): return False
+        if len(self.get_legal_moves()) == 0:
+            self.current_turn *= -1
+            return True
+        if not self.is_valid_move(row, col):
+            return False
 
         self.board[row][col] = self.current_turn
         self.flip_pieces(row, col)

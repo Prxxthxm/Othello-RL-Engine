@@ -1,23 +1,23 @@
 from othello import Othello
 import numpy as np
 import random
+import torch
 
 
 class Environment:
     def __init__(self):
         self.game = Othello()
 
-    def get_state(self) -> tuple[np.ndarray, int]:
+    def get_state(self) -> torch.Tensor:
         """
         Retrieves the current state of the environment
 
         Returns:
-            np.ndarray: the current board where 1 is a black piece, -1 is white, and 0 is an empty square.
-            int: the ID of the player whose turn it is (+1/-1)
+            torch.Tensor: the current board where 1 is a black piece, -1 is white, and 0 is an empty square.
         """
         return self.game.get_input()
 
-    def step(self, action: int) -> tuple[tuple[np.ndarray, int], int, int]:
+    def step(self, action: int) -> tuple[torch.Tensor, float, int]:
         """
         Takes a step in the environment.
 
@@ -28,32 +28,61 @@ class Environment:
 
         Returns
         -------
-        next_state : tuple of (np.ndarray, int)
+        next_state : tuple of (torch.Tensor, int)
             The next state after taking the action. Includes the updated board and the current turn.
-        reward : int
+        reward : float
             The reward obtained from the action.
-        done : bool
-            True if the game is over after this action, otherwise False.
+        done : int
+            1 if the game is over after this action, otherwise 0.
         """
 
         r, c = divmod(action, 8)
         player = self.game.current_turn
 
+        num_pieces_of_self_before = torch.sum(self.game.board == player)
         success = self.game.take_turn(r, c)
+        num_pieces_of_self_after = torch.sum(self.game.board == player)
+
+        num_pieces_overturned = num_pieces_of_self_after - num_pieces_of_self_before - 1
+
         if not success:
             return self.get_state(), -1, 0
 
         done = int(self.game.is_game_over())
-        reward = self._reward(player) if done else 0
+        reward = self._reward(player, done, r, c, num_pieces_overturned)
 
         return self.get_state(), reward, done
 
-    def _reward(self, player: int) -> int:
-        winner = self.game.get_winner_id()
-        if winner == 0:
-            return 0
+    def _reward(self, player: int, done: int, r: int, c: int, num_pieces_overturned: int) -> float:
+        """
+        Returns the reward obtained from the action.
 
-        return 1 if winner == player else -1
+        Parameters
+        ----------
+        player : int
+            Who made the action
+        done : int
+            True if the game is over after this action, otherwise False.
+        r : int
+        c : int
+        num_pieces_overturned : int
+
+        Returns
+        -------
+        reward : float
+            The reward obtained from the action.
+        """
+        if done == 1:
+            winner = self.game.get_winner_id()
+            if winner == 0:
+                return 0
+
+            return 1 if winner == player else -1
+        else:
+            reward = num_pieces_overturned * 0.01
+            if (r == 0 and c == 0) or (r == 0 and c == 7) or (r == 7 and c == 0) or (r == 7 and c == 7):
+                reward += 0.05
+            return reward
 
     def reset(self) -> None:
         self.game = Othello()
